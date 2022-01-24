@@ -33,6 +33,21 @@
         user=root
         password="temp123"
 
+  - name: Removes test database
+    no_log: true
+    community.mysql.mysql_db:
+      name: test
+      state: absent
+
+  - name: Prohibit Remote Root login
+    no_log: true
+    community.mysql.mysql_query:
+      login_db: mysql
+      query: "{{ item }}"
+    with_items:
+      - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+      - FLUSH PRIVILEGES;      
+
   - name: Configure apache2
     lineinfile:
       path: /etc/apache2/mods-enabled/dir.conf
@@ -45,4 +60,3 @@
         service:
           name: apache2
           state: restarted
-
