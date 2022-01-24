@@ -54,9 +54,12 @@
       regexp: "^\tDirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm$"
       line: "\tDirectoryIndex index.php index.html index.cgi index.pl index.php index.xhtml index.htm"
     notify: Restart Apache2
-
+  
   handlers:
       - name: Restart Apache2
         service:
           name: apache2
           state: restarted
+  
+  - name: install Hello World PHP script
+     copy: src=index.php dest=/var/www/html/index.php mode=0664        
