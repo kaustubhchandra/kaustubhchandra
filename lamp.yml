@@ -16,3 +16,19 @@
       - libapache2-mod-php 
       - php-mysql
       - python3-pymysql
+   
+  - name: Set root password
+    no_log: true
+    community.mysql.mysql_user:
+      name: root
+      password: temp123
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+
+  - name: Copy .my.cnf for easier mysql automation
+    blockinfile:
+      path: ~/.my.cnf
+      create: yes
+      block: |
+        [client]
+        user=root
+        password="temp123"
