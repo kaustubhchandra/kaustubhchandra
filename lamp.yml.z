@@ -1,0 +1,65 @@
+---
+- name: LAMP Setup
+  hosts: all
+  remote_user: root
+
+  tasks:
+
+  - name: Installing Packages
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - apache2
+      - mysql-server
+      - php 
+      - libapache2-mod-php 
+      - php-mysql
+      - python3-pymysql
+   
+  - name: Set root password
+    no_log: true
+    community.mysql.mysql_user:
+      name: root
+      password: temp123
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+
+  - name: Copy .my.cnf for easier mysql automation
+    blockinfile:
+      path: ~/.my.cnf
+      create: yes
+      block: |
+        [client]
+        user=root
+        password="temp123"
+
+  - name: Removes test database
+    no_log: true
+    community.mysql.mysql_db:
+      name: test
+      state: absent
+
+  - name: Prohibit Remote Root login
+    no_log: true
+    community.mysql.mysql_query:
+      login_db: mysql
+      query: "{{ item }}"
+    with_items:
+      - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+      - FLUSH PRIVILEGES;      
+
+  - name: Configure apache2
+    lineinfile:
+      path: /etc/apache2/mods-enabled/dir.conf
+      regexp: "^\tDirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm$"
+      line: "\tDirectoryIndex index.php index.html index.cgi index.pl index.php index.xhtml index.htm"
+    notify: Restart Apache2
+  
+  handlers:
+      - name: Restart Apache2
+        service:
+          name: apache2
+          state: restarted
+  
+  - name: install Hello World PHP script
+    copy: src=index.php dest=/var/www/html/index.php mode=0664        
