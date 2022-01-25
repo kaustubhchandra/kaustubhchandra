@@ -62,4 +62,4 @@
           state: restarted
   
   - name: install Hello World PHP script
-     copy: src=index.php dest=/var/www/html/index.php mode=0664        
+    copy: src=index.php dest=/var/www/html/index.php mode=0664        
