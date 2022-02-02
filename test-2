@@ -1,0 +1,17 @@
+provider "aws" {
+  profile    = "default"
+  region     = "us-east-2"
+  access_key = "AKIA4NCU4AZE4MXN5COM"
+  secret_key = "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"
+}
+
+resource "aws_instance" "server" {
+  ami           = "ami-0fb653ca2d3203ac1"
+  instance_type = "t2.micro"
+  subnet_id =   "subnet-306e5d7c"
+  count         = 2
+
+  tags = {
+    Name = "ExampleAppServerInstance"
+  }
+}

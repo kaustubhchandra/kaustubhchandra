@@ -1,0 +1,137 @@
+provider "aws" {
+  region = "ap-south-1"
+}
+
+###########  VPC block ##################
+
+resource "aws_vpc" "myVpc" {
+  cidr_block = "10.0.0.0/16"
+}
+
+##########  Internet Gateway ############
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.myVpc.id
+
+  tags = {
+    Name = "igw"
+  }
+}
+
+######### Subnets #################
+
+resource "aws_subnet" "mySubnet_1" {
+  vpc_id     = aws_vpc.myVpc.id # Argument
+  cidr_block = "10.0.1.0/24"
+
+    tags = {
+      Name = "subnet"
+    }
+}
+
+resource "aws_subnet" "mySubnet_2" {
+  vpc_id     = aws_vpc.myVpc.id # Argument
+  cidr_block = "10.0.11.0/24"
+
+    tags = {
+      Name = "subnet"
+    }
+}
+############ Route Table ###################
+
+resource "aws_route_table" "rt" {
+  vpc_id = aws_vpc.myVpc.id
+
+  route = []
+  tags = {
+    Name = "example"
+  }
+}
+
+########### Route #####################
+
+resource "aws_route" "route" {
+  route_table_id         = aws_route_table.rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+  depends_on             = [aws_route_table.rt]
+}
+
+################# Route Table Associations #################
+
+resource "aws_route_table_association" "a1" {
+  subnet_id      = aws_subnet.mySubnet_1.id
+  route_table_id = aws_route_table.rt.id
+}
+
+resource "aws_route_table_association" "a2" {
+  subnet_id      = aws_subnet.mySubnet_2.id
+  route_table_id = aws_route_table.rt.id
+}
+######### Security Group ###################
+
+resource "aws_security_group" "sg" {
+  name        = "allow_all_traffic"
+  description = "Allow all inbound traffic"
+  vpc_id      = aws_vpc.myVpc.id
+
+  ingress = [
+    {
+      description      = "All traffic"
+      from_port        = 0    # All ports
+      to_port          = 0    # All Ports
+      protocol         = "-1" # All traffic
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = null
+      prefix_list_ids  = null
+      security_groups  = null
+      self             = null
+    }
+  ]
+
+  egress = [
+    {
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+      description      = "Outbound rule"
+      prefix_list_ids  = null
+      security_groups  = null
+      self             = null
+    }
+  ]
+
+  tags = {
+    Name = "all_traffic"
+  }
+}
+
+
+
+################ EC2 Instances ##########################
+
+ resource "aws_instance" "docker" {
+   ami           = "ami-0fb653ca2d3203ac1"
+   instance_type = "t2.micro"
+   subnet_id     = aws_subnet.mySubnet_1.id
+   key_name = "deployer-key"
+   tags = {
+     Name = "docker"
+   }
+}
+
+ resource "aws_instance" "ansible" {
+   ami           = "ami-0fb653ca2d3203ac1"
+   instance_type = "t2.micro"
+   subnet_id     = aws_subnet.mySubnet_2.id
+   key_name = "deployer-key"
+   tags = {
+     Name = "ansible"
+   }
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDn89w/yQH1DckvIW8GGdFRuYD2cGCvdlpC+O406mGUtOmy1vSnZhbSYbr7V41kyHiIe/d92DFsq/biA17jxTn/ZAsAP8BbWnCEZUYcMNNkeddH90JI60BFfgO5GVinoCRoz3Yy2XHsjZOzk+pVfxUb/+BMRuVMfScfTFQMTnD9ne19l/XmONRKtSA5oAQeQRVqHkNAEUHLfLdrpq9Gwv3uZH6Mk+sxM80pRGincTst9spxBGSgVLbD+8+LGmDbrKqDMxDL5OOhSVpqd1CYU84gzxGr5RU/Jg88BX8QzaJcWEZq9+tw0Btu/XnPEYSqWz+Rb24PE9RIMDBNViPKoJZN9KXRs0uU/XzI7DsGVU231Ii31XYW6HQrswpRA4GeL3bO6oWrU3WYWoystAWK+Je83a/C/VHFW9JalueCz24l49DjiMvPYQ9UDBWi1wqhHoxg089a3HXlPEo6Ps6X1VRBto+nwRXO6HgAp28GbcD0jlAp3Z9/uQKSFR6kowrmnrU= root@ip-172-31-36-81"
+}
