@@ -2,11 +2,6 @@
 <h1 align="center"><font face="Arial">Hi 👋, I'm Kaustubhchandra </font></h1>
 <h3 align="center"><font face="Arial"><a href="https://www.linkedin.com/in/kaustubhchandraa/" target="_blank" rel="noreferrer">Kaustubhchandra</a> is a passionate DevOps Engineer from India, working on Cloud and DevOps for 3+ years now. Feel free to reach out for any Freelance Projects.</font></h3>
 
-<!-- Schedule a 1-on-1 Call Section -->
-<h3 align="left"><font size="+2" face="Verdana">Schedule a 1-on-1 Call:</font></h3>
-<p align="left">
-   Book a Call with me! </a>
-</p>
 
 <!-- GIF -->
 <img align="right" height="300" width="500" src="https://raw.githubusercontent.com/mikonoid/mikonoid/main/images/gifs/coder3.gif" />
